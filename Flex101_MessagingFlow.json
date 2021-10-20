@@ -1,0 +1,198 @@
+{
+  "description": "Bot flow for creating a Flex messaging task",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "Greeting",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": -10
+        }
+      }
+    },
+    {
+      "name": "SendMessageToAgent",
+      "type": "send-to-flex",
+      "transitions": [
+        {
+          "event": "callComplete"
+        },
+        {
+          "event": "failedToEnqueue"
+        },
+        {
+          "event": "callFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -30,
+          "y": 1200
+        },
+        "workflow": "WW813c84105a3cc5acb977f38396c6ed80",
+        "channel": "TC334c6d9a3057ed96785d73d01c167be6",
+        "attributes": "{\"name\": \"{{trigger.message.ChannelAttributes.from}}\", \"channelType\": \"{{trigger.message.ChannelAttributes.channel_type}}\", \"channelSid\": \"{{trigger.message.ChannelSid}}\"}"
+      }
+    },
+    {
+      "name": "Greeting",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "Menu1",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -10,
+          "y": 190
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Welcome to Signal 2021!!"
+      }
+    },
+    {
+      "name": "Menu1",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_1",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -10,
+          "y": 420
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "To speak to an agent reply AGENT.  To receive a text message link to the session materials, reply LINK.",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "Menu1",
+          "event": "noMatch"
+        },
+        {
+          "next": "send_message_2",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value contains AGENT",
+              "arguments": [
+                "{{widgets.Menu1.inbound.Body}}"
+              ],
+              "type": "contains",
+              "value": "AGENT"
+            }
+          ]
+        },
+        {
+          "next": "send_message_3",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value contains LINK",
+              "arguments": [
+                "{{widgets.Menu1.inbound.Body}}"
+              ],
+              "type": "contains",
+              "value": "LINK"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.Menu1.inbound.Body}}",
+        "offset": {
+          "x": -10,
+          "y": 660
+        }
+      }
+    },
+    {
+      "name": "send_message_2",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "SendMessageToAgent",
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -30,
+          "y": 950
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "We are transferring you to an agent know.  Please be aware that outside of the session hours, an agent may not be available."
+      }
+    },
+    {
+      "name": "send_message_3",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 370,
+          "y": 950
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Twilio Flex 101: Where do I start?\nhttps://github.com/twittbrod/flex101_signal2021"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
