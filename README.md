@@ -8,7 +8,7 @@ Phone numbers to interact with demo (voice and text enabled):
 * +447862133894
 * +15756184290
 
-Signal 2021 CRM Plugin: 
+Signal 2021 CRM Plugin, including pre-reqs: 
 * https://github.com/charleslucot/Signal2021CrmPlugin
 
 Studio Flows:
